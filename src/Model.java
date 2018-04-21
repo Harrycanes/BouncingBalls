@@ -13,12 +13,14 @@ import java.util.ArrayList;
 class Model {
 
 	double areaWidth, areaHeight;
+	double gravity = 9.82;
 	
 	Ball [] balls;
 
 	Model(double width, double height) {
 		areaWidth = width;
 		areaHeight = height;
+		
 		
 		// Initialize the model with a few balls
 		balls = new Ball[2];
@@ -28,8 +30,11 @@ class Model {
 
 	void step(double deltaT) {
 		// TODO this method implements one step of simulation with a step deltaT
+		
 
 		for (Ball b : balls) {
+			double deltaG = b.radius*b.radius*Math.PI;
+			b.vy=b.vy-deltaG;
 			// detect collision with the border
 			if (b.x < b.radius || b.x > areaWidth - b.radius) {
 				b.vx *= -1; // change direction of ball
@@ -38,10 +43,14 @@ class Model {
 			if (b.y < b.radius || b.y > areaHeight - b.radius) {
 				b.vy *= -1;
 			}
-			
 			// compute new position according to the speed of the ball
+			if(b.y > areaHeight-b.radius ){
+				b.y = areaHeight-b.radius;
+				b.vy=-1*Math.abs(b.vy);
+			}
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
+
 		}
 	}
 	

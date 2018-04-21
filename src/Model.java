@@ -28,26 +28,14 @@ class Model {
 
 	void step(double deltaT) {
 		// TODO this method implements one step of simulation with a step deltaT
-		ArrayList<Double> xList = new ArrayList<>();
-		ArrayList<Double> yList = new ArrayList<>();
-		for (Ball b : balls) {
-			xList.add((b.x+b.radius));
-			yList.add((b.y+b.radius));
-			System.out.println(""+b.x);
-		}
-		
+
 		for (Ball b : balls) {
 			// detect collision with the border
 			if (b.x < b.radius || b.x > areaWidth - b.radius) {
 				b.vx *= -1; // change direction of ball
 			}
-			else if (xList.contains((b.x+b.radius))){
-				b.vx *= -1;
-			}
+
 			if (b.y < b.radius || b.y > areaHeight - b.radius) {
-				b.vy *= -1;
-			}
-			else if (yList.contains((b.y+b.radius))){
 				b.vy *= -1;
 			}
 			

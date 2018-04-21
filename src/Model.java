@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-
+import java.util.Random;
 /**
  * The physics model.
  * 
@@ -14,7 +13,7 @@ class Model {
 
 	double areaWidth, areaHeight;
 	double gravity = 9.82;
-	
+	Random rand = new Random();
 	Ball [] balls;
 
 	Model(double width, double height) {
@@ -23,9 +22,17 @@ class Model {
 		
 		
 		// Initialize the model with a few balls
-		balls = new Ball[2];
-		balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2);
-		balls[1] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3);
+		balls = ballGenerator(2);
+	}
+	Ball[] ballGenerator(int balls){
+		Ball[] ballArray = new Ball[balls];
+		for(int i=0;i<balls; i++){
+			ballArray[i]= new Ball(areaWidth / 3, areaHeight * 0.9, rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()/3);
+		}
+		return ballArray;
+	}
+	void bounce(){
+		
 	}
 
 	void step(double deltaT) {

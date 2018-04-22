@@ -15,6 +15,11 @@ class Model {
 	double gravity = 9.82;
 	Random rand = new Random();
 	Ball [] balls;
+	
+	final static int ELEMENT_WEIGHT = 10; 
+	
+	
+	//random values
 
 	Model(double width, double height) {
 		areaWidth = width;
@@ -27,12 +32,15 @@ class Model {
 	Ball[] ballGenerator(int balls){
 		Ball[] ballArray = new Ball[balls];
 		for(int i=0;i<balls; i++){
-			ballArray[i]= new Ball(areaWidth / 3, areaHeight * 0.9, rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()/3);
+			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3);
 		}
 		return ballArray;
 	}
 	void bounce(){
 		
+	}
+	double volume(double r){
+		return (r*r*r*(4/3)*Math.PI);
 	}
 
 	void step(double deltaT) {
@@ -40,7 +48,7 @@ class Model {
 		
 
 		for (Ball b : balls) {
-			double deltaG = b.radius*b.radius*Math.PI;
+			double deltaG = volume(b.radius)*Model.ELEMENT_WEIGHT;
 			b.vy=b.vy-deltaG;
 			// detect collision with the border
 			if (b.x < b.radius || b.x > areaWidth - b.radius) {

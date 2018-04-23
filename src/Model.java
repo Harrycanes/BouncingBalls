@@ -50,14 +50,33 @@ class Model {
 				bi.vx*=-1;
 				bj.vx*=-1;
 			}
+			else{
+				if(Math.abs(bi.vx)<Math.abs(bj.vx)){
+					bj.vx*=-1;
+				}
+				else {
+					bi.vx*=-1;
+				}
+			}
 			if (dirY<0){
 				bi.vy*=-1;
 				bj.vy*=-1;
+			}
+			else{
+				if(Math.abs(bi.vy)<Math.abs(bj.vy)){
+					bj.vy*=-1;
+				}
+				else {
+					bi.vy*=-1;
+				}
 			}
 		}
 	}
 	double volume(double r){
 		return (r*r*r*(4/3)*Math.PI);
+	}
+	double area(double r){
+		return (r*r*Math.PI);
 	}
 
 	void step(double deltaT) {

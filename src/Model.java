@@ -39,17 +39,20 @@ class Model {
 		return ballArray;
 	}
 	void collision(Ball bi, Ball bj){
-		double dirX = bi.vx*bj.vx;
+		//Implementation of polära former gör detta värdelöst
+		double dirX = bi.vx*bj.vx; //Åker bollarna åt samma håll? Negativt värde innebär nej
 		double dirY = bi.vy*bj.vy;
-		double posx1 = bi.x;
-		double width = bi.x+(bi.radius*2);
-		double posy1 = bi.y;
-		double height = bi.y+(bi.radius*2);
+		double posx1 = bi.x;				//Var x hörnet av bollen är
+		double width = bi.x+(bi.radius*2);	//Bredden på bollen
+		double posy1 = bi.y;				//Var y hörnet av bollen är
+		double height = bi.y+(bi.radius*2);	//höjden på bollen
 		if (bj.x>posx1&&bj.x<width&&bj.y>posy1&&bj.y<height){
+			//Möte innebär att båda bollar byter håll
 			if (dirX<0){
 				bi.vx*=-1;
 				bj.vx*=-1;
 			}
+			//Annars beror det på den med högst fart
 			else{
 				if(Math.abs(bi.vx)<Math.abs(bj.vx)){
 					bj.vx*=-1;
@@ -72,9 +75,11 @@ class Model {
 			}
 		}
 	}
+	//Volym hos boll
 	double volume(double r){
 		return (r*r*r*(4/3)*Math.PI);
 	}
+	//Area hos boll
 	double area(double r){
 		return (r*r*Math.PI);
 	}
@@ -90,6 +95,7 @@ class Model {
 		}
 
 		for (Ball b : balls) {
+			//Gravitation inräknad
 			double deltaG = volume(b.radius)*Model.ELEMENT_WEIGHT*gravity;
 			
 			// compute new position according to the speed of the ball
@@ -106,6 +112,7 @@ class Model {
 				b.vy *= -0.98;
 			}
 			
+			//Så att bollen inte fastnar i kanten
 			if(b.y > areaHeight-b.radius ){
 				b.y = areaHeight-b.radius;
 				b.vy= (-1*Math.abs(b.vy));

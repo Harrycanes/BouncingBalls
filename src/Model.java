@@ -12,11 +12,11 @@ import java.util.Random;
 class Model {
 
 	double areaWidth, areaHeight;
-	double gravity = 9.82;
 	Random rand = new Random();
 	Ball [] balls;
 	
-	final static int ELEMENT_WEIGHT = 2; 
+	final static int ELEMENT_WEIGHT = 2;
+	final static double GRAVITY = 9.82; 
 	
 	
 	//random values
@@ -27,32 +27,32 @@ class Model {
 		
 		
 		// Initialize the model with a few balls
-		balls = ballGenerator(2);
+		balls = ballGenerator(4);
 	}
 	Ball[] ballGenerator(int balls){
 		Ball[] ballArray = new Ball[balls];
-		ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.1);
-		ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.2);
-		/*for(int i=0;i<balls; i++){
+		//ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.1);
+		//ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.2);
+		for(int i=0;i<balls; i++){
 			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3);
-		}*/
+		}
 		return ballArray;
 	}
 	void collision(Ball bi, Ball bj){
-		//Implementation of polära former gör detta värdelöst
-		double dirX = bi.vx*bj.vx; //Åker bollarna åt samma håll? Negativt värde innebär nej
+		//Implementation of polar velocities makes this deprecated (redundant)
+		double dirX = bi.vx*bj.vx; //Do the balls travel in the same direction?
 		double dirY = bi.vy*bj.vy;
-		double posx1 = bi.x;				//Var x hörnet av bollen är
-		double width = bi.x+(bi.radius*2);	//Bredden på bollen
-		double posy1 = bi.y;				//Var y hörnet av bollen är
-		double height = bi.y+(bi.radius*2);	//höjden på bollen
+		double posx1 = bi.x;				//Corner of the ball, x
+		double width = bi.x+(bi.radius*2);	//Width of the ball
+		double posy1 = bi.y;				//Corner of the ball, y
+		double height = bi.y-(bi.radius*2);	//Height of the ball
 		if (bj.x>posx1&&bj.x<width&&bj.y>posy1&&bj.y<height){
-			//Möte innebär att båda bollar byter håll
+			//The balls meet
 			if (dirX<0){
 				bi.vx*=-1;
 				bj.vx*=-1;
 			}
-			//Annars beror det på den med högst fart
+			//Otherwise it depends on which has the higher speed
 			else{
 				if(Math.abs(bi.vx)<Math.abs(bj.vx)){
 					bj.vx*=-1;
@@ -75,11 +75,11 @@ class Model {
 			}
 		}
 	}
-	//Volym hos boll
+	//Ball's volume
 	double volume(double r){
 		return (r*r*r*(4/3)*Math.PI);
 	}
-	//Area hos boll
+	//Ball's area
 	double area(double r){
 		return (r*r*Math.PI);
 	}
@@ -95,8 +95,8 @@ class Model {
 		}
 
 		for (Ball b : balls) {
-			//Gravitation inräknad
-			double deltaG = volume(b.radius)*Model.ELEMENT_WEIGHT*gravity;
+			//Gravitation calculated
+			double deltaG = volume(b.radius)*Model.ELEMENT_WEIGHT*Model.GRAVITY;
 			
 			// compute new position according to the speed of the ball
 			b.vy=b.vy-deltaG;
@@ -105,14 +105,14 @@ class Model {
 			
 			// detect collision with the border
 			if (b.x < b.radius || b.x > areaWidth - b.radius) {
-				b.vx *= -0.98; // change direction of ball
+				b.vx *= -0.99; // change direction of ball
 			}
 
 			if (b.y < b.radius || b.y > areaHeight - b.radius) {
-				b.vy *= -0.98;
+				b.vy *= -0.99;
 			}
 			
-			//Så att bollen inte fastnar i kanten
+			//So that the ball doesn't get stuck in border
 			if(b.y > areaHeight-b.radius ){
 				b.y = areaHeight-b.radius;
 				b.vy= (-1*Math.abs(b.vy));
@@ -129,8 +129,6 @@ class Model {
 				b.x = b.radius;
 				b.vx=Math.abs(b.vx);
 			}
-			
-
 			
 		}
 	}

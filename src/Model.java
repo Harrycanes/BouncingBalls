@@ -34,11 +34,11 @@ class Model {
 	//random values
 	Ball[] ballGenerator(int balls){
 		Ball[] ballArray = new Ball[balls];
-		//ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.1);
-		//ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.2);
-		for(int i=0;i<balls; i++){
+		ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.1);
+		ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.2);
+		/*for(int i=0;i<balls; i++){
 			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3);
-		}
+		}*/
 		return ballArray;
 	}
 	void kinEX(Ball bi, Ball bj) {
@@ -46,68 +46,45 @@ class Model {
 		double mj = bj.mass;
 		double I = mi*bi.vx+mj*bj.vx;
 		double R = -(bj.vx-bi.vx);
-		bj.vx = I-(mi*R)/(mi+mj);
+		bj.vx = I+(mi*R)/(mi+mj);
 		bi.vx = bj.vx-R;
-		System.out.println(""+bj.vx+""+bi.vx);
+	}
+	void kinEY(Ball bi, Ball bj) {
+		double mi = bi.mass;
+		double mj = bj.mass;
+		double I = mi*bi.vy+mj*bj.vy;
+		double R = -(bj.vy-bi.vy);
+		bj.vy = I+(mi*R)/(mi+mj);
+		bi.vy = bj.vy-R;
 	}
 	Direction collisionDetection(Ball bi, Ball bj) {
-		if(bj.x > bi.x && bj.x < bi.x2 && bj.y > bi.y && bj.y < bi.y2) {
+		if(bj.x > bi.x && bj.x < bi.x2 && bj.y < bi.y && bj.y > bi.y2) {
 			return Direction.NORTH;
 		}
-		else if (bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y > bi.y && bj.y < bi.y2) {
+		else if (bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y < bi.y && bj.y > bi.y2) {
 			return Direction.EAST;
 		}
-		else if (bj.x > bi.x && bj.x < bi.x2 && bj.y2 > bi.y && bj.y2 < bi.y2) {
+		else if (bj.x > bi.x && bj.x < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2) {
 			return Direction.SOUTH;
 		}
-		else if (bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y2 > bi.y && bj.y2 < bi.y2) {
+		else if (bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2) {
 			return Direction.WEST;
 		}
 		else {
 			return Direction.NOCOLLISION;
-		}
-	}
-	void changeDirection (double dirX, double dirY, Ball bi, Ball bj) {
-		if (dirX<0){
-			bi.vx*=-1;
-			bj.vx*=-1;
-		}
-		//Otherwise it depends on which has the higher speed
-		else{
-			if(Math.abs(bi.vx)<Math.abs(bj.vx)){
-				bj.vx*=-1;
-			}
-			else {
-				bi.vx*=-1;
-			}
-		}
-		if (dirY<0){
-			bi.vy*=-1;
-			bj.vy*=-1;
-		}
-		else{
-			if(Math.abs(bi.vy)<Math.abs(bj.vy)){
-				bj.vy*=-1;
-			}
-			else {
-				bi.vy*=-1;
-			}
-		}
-		
+		}		
 	}
 	void collision(Ball bi, Ball bj){
-		//Implementation of polar velocities makes this deprecated (redundant)
-		double dirX = bi.vx*bj.vx; //Do the balls travel in the same direction?
-		double dirY = bi.vy*bj.vy;
+		//Implementation of polar velocities makes this deprecated (redundant) ??
 		switch(collisionDetection(bi,bj)) {
 			case NORTH:
-				
+				kinEY(bi,bj);
 				break;
 			case SOUTH:
-				
+				kinEY(bi,bj);
 				break;
-			case WEST:
-				
+			case WEST: 
+				kinEX(bi,bj);
 				break;
 			case EAST:
 				kinEX(bi,bj);
@@ -130,11 +107,11 @@ class Model {
 		for(int i=0;i<balls.length;i++){
 			Ball bi=balls[i];
 			bi.x2 = bi.x+(bi.radius*2);
-			bi.y2 = bi.y+(bi.radius*2);
+			bi.y2 = bi.y-(bi.radius*2);
 			for(int j=i+1;j<balls.length;j++){
 				Ball bj = balls[j];
 				bj.x2 = bj.x+(bi.radius*2);
-				bj.y2 = bj.y+(bi.radius*2);
+				bj.y2 = bj.y-(bi.radius*2);
 				collision(bi,bj);
 			}
 		}
@@ -190,8 +167,8 @@ class Model {
 			this.vx = vx;
 			this.vy = vy;
 			this.radius = r;
-			this.x2 = this.x+(2*this.radius);
-			this.y2 = this.y+(2*this.radius);
+			this.x2 = this.x-this.radius;
+			this.y2 = this.y-this.radius;
 			this.mass = volume(r)*Model.ELEMENT_WEIGHT;
 		}
 

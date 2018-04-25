@@ -19,7 +19,7 @@ class Model {
 	final static double GRAVITY = 9.82; 
 	
 	public enum Direction {
-		NORTH, EAST, SOUTH, WEST, NOCOLLISION
+		NORTHWEST, NORTHEAST, SOUTHEAST, SOUTHWEST, NOCOLLISION
 	}
 	
 	
@@ -57,41 +57,84 @@ class Model {
 		bj.vy = I+(mi*R)/(mi+mj);
 		bi.vy = bj.vy-R;
 	}
+	void kinE(Ball bi, Ball bj) {
+		double I = bi.mass*bi.trueVelocity+bj.mass*bj.trueVelocity;
+		double R = -(bj.trueVelocity-bi.trueVelocity);
+		bj.vy = I+(bi.mass*R)/(bi.mass+bj.mass);
+		bi.vy = bj.trueVelocity-R;
+	}
+	void polarToRect(Ball bi, Ball bj) {
+		bi.vx = Math.sin(bi.angle)*bi.trueVelocity;
+        bi.vy = Math.cos(bi.angle)*bi.trueVelocity;
+        
+		bj.vx = Math.sin(bj.angle)*bj.trueVelocity;
+        bj.vy = Math.cos(bj.angle)*bj.trueVelocity;
+	}
+	void rectToPolar(Ball bi, Ball bj) {
+        bi.trueVelocity = Math.sqrt(bi.vx*bi.vx+bi.vy*bi.vy);
+        bi.angle = Math.asin(bi.vx / bi.trueVelocity);
+        
+        bj.trueVelocity = Math.sqrt(bj.vx*bj.vx+bj.vy*bj.vy);
+        bj.angle = Math.asin(bj.vx / bj.trueVelocity);
+	}
 	Direction collisionDetection(Ball bi, Ball bj) {
-		if(bj.x > bi.x && bj.x < bi.x2 && bj.y < bi.y && bj.y > bi.y2) {
-			return Direction.NORTH;
+		
+		if((bj.x > bi.x && bj.x < bi.x2 && bj.y < bi.y && bj.y > bi.y2)
+				||(bi.x > bj.x && bi.x < bj.x2 && bi.y < bj.y && bi.y > bj.y2)){
+			return Direction.NORTHWEST;
 		}
-		else if (bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y < bi.y && bj.y > bi.y2) {
-			return Direction.EAST;
+		else if ((bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y < bi.y && bj.y > bi.y2)
+			||(bi.x2 > bj.x && bi.x2 < bj.x2 && bi.y < bj.y && bi.y > bj.y2)){
+			return Direction.NORTHEAST;
 		}
-		else if (bj.x > bi.x && bj.x < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2) {
-			return Direction.SOUTH;
+		else if ((bj.x > bi.x && bj.x < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2)
+			||(bi.x > bj.x && bi.x < bj.x2 && bi.y2 < bj.y && bi.y2 > bj.y2)){
+			return Direction.SOUTHWEST;
 		}
-		else if (bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2) {
-			return Direction.WEST;
+		else if ((bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2)
+			||(bi.x2 > bj.x && bi.x2 < bj.x2 && bi.y2 < bj.y && bi.y2 > bj.y2)){
+			return Direction.SOUTHEAST;
 		}
 		else {
 			return Direction.NOCOLLISION;
 		}		
 	}
+
 	void collision(Ball bi, Ball bj){
+        double x = Math.abs(bi.x - bj.x);
+        double y = Math.abs(bi.y - bj.y);
+        double dist = Math.sqrt(x*x + y*y);
+        if(dist <= (bi.radius + bj.radius)){
+        	System.out.println("detected");
+			rectToPolar(bi,bj);
+			kinE(bi,bj);
+			polarToRect(bi,bj);
+        }
 		//Implementation of polar velocities makes this deprecated (redundant) ??
-		switch(collisionDetection(bi,bj)) {
-			case NORTH:
-				kinEY(bi,bj);
+		/*switch(collisionDetection(bi,bj)) {
+			case NORTHWEST:
+				rectToPolar(bi,bj);
+				kinE(bi,bj);
+				polarToRect(bi,bj);
 				break;
-			case SOUTH:
-				kinEY(bi,bj);
+			case SOUTHWEST:
+				rectToPolar(bi,bj);
+				kinE(bi,bj);
+				polarToRect(bi,bj);
 				break;
-			case WEST: 
-				kinEX(bi,bj);
+			case NORTHEAST: 
+				rectToPolar(bi,bj);
+				kinE(bi,bj);
+				polarToRect(bi,bj);
 				break;
-			case EAST:
-				kinEX(bi,bj);
+			case SOUTHEAST:
+				rectToPolar(bi,bj);
+				kinE(bi,bj);
+				polarToRect(bi,bj);
 				break;
 			case NOCOLLISION:
 				break;
-		}
+		}*/
 	}
 	//Ball's volume
 	double volume(double r){
@@ -178,5 +221,6 @@ class Model {
 		double x, y, vx, vy, radius;
 		double x2,y2;
 		final double mass;
+		double angle,trueVelocity;
 	}
 }

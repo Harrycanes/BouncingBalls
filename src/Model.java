@@ -14,6 +14,7 @@ class Model {
 	double areaWidth, areaHeight;
 	Random rand = new Random();
 	Ball [] balls;
+	boolean sameDirection;
 	
 	final static int ELEMENT_WEIGHT = 2;
 	final static double GRAVITY = 9.82; 
@@ -29,16 +30,16 @@ class Model {
 		
 		
 		// Initialize the model with a few balls
-		balls = ballGenerator(2);
+		balls = ballGenerator(3);
 	}
 	//random values
 	Ball[] ballGenerator(int balls){
 		Ball[] ballArray = new Ball[balls];
 		ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.1);
 		ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.2);
-		/*for(int i=0;i<balls; i++){
+		for(int i=2;i<balls; i++){
 			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3);
-		}*/
+		}
 		return ballArray;
 	}
 	void kinEX(Ball bi, Ball bj) {
@@ -71,70 +72,19 @@ class Model {
         bj.vy = Math.cos(bj.angle)*bj.trueVelocity;
 	}
 	void rectToPolar(Ball bi, Ball bj) {
+		sameDirection=(Math.signum(bi.vx)==Math.signum(bj.vx));
         bi.trueVelocity = Math.sqrt(bi.vx*bi.vx+bi.vy*bi.vy);
         bi.angle = Math.asin(bi.vx / bi.trueVelocity);
         
         bj.trueVelocity = Math.sqrt(bj.vx*bj.vx+bj.vy*bj.vy);
         bj.angle = Math.asin(bj.vx / bj.trueVelocity);
 	}
-	Direction collisionDetection(Ball bi, Ball bj) {
-		
-		if((bj.x > bi.x && bj.x < bi.x2 && bj.y < bi.y && bj.y > bi.y2)
-				||(bi.x > bj.x && bi.x < bj.x2 && bi.y < bj.y && bi.y > bj.y2)){
-			return Direction.NORTHWEST;
-		}
-		else if ((bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y < bi.y && bj.y > bi.y2)
-			||(bi.x2 > bj.x && bi.x2 < bj.x2 && bi.y < bj.y && bi.y > bj.y2)){
-			return Direction.NORTHEAST;
-		}
-		else if ((bj.x > bi.x && bj.x < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2)
-			||(bi.x > bj.x && bi.x < bj.x2 && bi.y2 < bj.y && bi.y2 > bj.y2)){
-			return Direction.SOUTHWEST;
-		}
-		else if ((bj.x2 > bi.x && bj.x2 < bi.x2 && bj.y2 < bi.y && bj.y2 > bi.y2)
-			||(bi.x2 > bj.x && bi.x2 < bj.x2 && bi.y2 < bj.y && bi.y2 > bj.y2)){
-			return Direction.SOUTHEAST;
-		}
-		else {
-			return Direction.NOCOLLISION;
-		}		
-	}
 
-	void collision(Ball bi, Ball bj){
+	boolean collision(Ball bi, Ball bj){
         double x = Math.abs(bi.x - bj.x);
         double y = Math.abs(bi.y - bj.y);
         double dist = Math.sqrt(x*x + y*y);
-        if(dist <= (bi.radius + bj.radius)){
-        	System.out.println("detected");
-			rectToPolar(bi,bj);
-			kinE(bi,bj);
-			polarToRect(bi,bj);
-        }
-		//Implementation of polar velocities makes this deprecated (redundant) ??
-		/*switch(collisionDetection(bi,bj)) {
-			case NORTHWEST:
-				rectToPolar(bi,bj);
-				kinE(bi,bj);
-				polarToRect(bi,bj);
-				break;
-			case SOUTHWEST:
-				rectToPolar(bi,bj);
-				kinE(bi,bj);
-				polarToRect(bi,bj);
-				break;
-			case NORTHEAST: 
-				rectToPolar(bi,bj);
-				kinE(bi,bj);
-				polarToRect(bi,bj);
-				break;
-			case SOUTHEAST:
-				rectToPolar(bi,bj);
-				kinE(bi,bj);
-				polarToRect(bi,bj);
-				break;
-			case NOCOLLISION:
-				break;
-		}*/
+        return(dist <= (bi.radius + bj.radius));
 	}
 	//Ball's volume
 	double volume(double r){
@@ -149,13 +99,13 @@ class Model {
 		// TODO this method implements one step of simulation with a step deltaT
 		for(int i=0;i<balls.length;i++){
 			Ball bi=balls[i];
-			bi.x2 = bi.x+(bi.radius*2);
-			bi.y2 = bi.y-(bi.radius*2);
 			for(int j=i+1;j<balls.length;j++){
 				Ball bj = balls[j];
-				bj.x2 = bj.x+(bi.radius*2);
-				bj.y2 = bj.y-(bi.radius*2);
-				collision(bi,bj);
+				if(collision(bi,bj)){					
+					rectToPolar(bi,bj);
+					kinE(bi,bj);
+					polarToRect(bi,bj);			        
+				}
 			}
 		}
 
@@ -210,8 +160,6 @@ class Model {
 			this.vx = vx;
 			this.vy = vy;
 			this.radius = r;
-			this.x2 = this.x-this.radius;
-			this.y2 = this.y-this.radius;
 			this.mass = volume(r)*Model.ELEMENT_WEIGHT;
 		}
 
@@ -219,7 +167,6 @@ class Model {
 		 * Position, speed, and radius of the ball. You may wish to add other attributes.
 		 */
 		double x, y, vx, vy, radius;
-		double x2,y2;
 		final double mass;
 		double angle,trueVelocity;
 	}

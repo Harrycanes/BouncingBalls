@@ -61,18 +61,17 @@ class Model {
 	void kinE(Ball bi, Ball bj) {
 		double I = bi.mass*bi.trueVelocity+bj.mass*bj.trueVelocity;
 		double R = -(bj.trueVelocity-bi.trueVelocity);
-		bj.vy = I+(bi.mass*R)/(bi.mass+bj.mass);
-		bi.vy = bj.trueVelocity-R;
+		bj.trueVelocity = I+(bi.mass*R)/(bi.mass+bj.mass);
+		bi.trueVelocity = bj.trueVelocity-R;
 	}
 	void polarToRect(Ball bi, Ball bj) {
-		bi.vx = Math.sin(bi.angle)*bi.trueVelocity;
-        bi.vy = Math.cos(bi.angle)*bi.trueVelocity;
+		bi.vx = Math.cos(bi.angle)*bi.trueVelocity;
+        bi.vy = Math.sin(bi.angle)*bi.trueVelocity;
         
-		bj.vx = Math.sin(bj.angle)*bj.trueVelocity;
-        bj.vy = Math.cos(bj.angle)*bj.trueVelocity;
+		bj.vx = Math.cos(bj.angle)*bj.trueVelocity;
+        bj.vy = Math.sin(bj.angle)*bj.trueVelocity;
 	}
 	void rectToPolar(Ball bi, Ball bj) {
-		sameDirection=(Math.signum(bi.vx)==Math.signum(bj.vx));
         bi.trueVelocity = Math.sqrt(bi.vx*bi.vx+bi.vy*bi.vy);
         bi.angle = Math.asin(bi.vx / bi.trueVelocity);
         
@@ -101,10 +100,13 @@ class Model {
 			Ball bi=balls[i];
 			for(int j=i+1;j<balls.length;j++){
 				Ball bj = balls[j];
-				if(collision(bi,bj)){					
-					rectToPolar(bi,bj);
+				sameDirection=(Math.signum(bi.vx)==Math.signum(bj.vx));
+				if(collision(bi,bj)){
+					kinEY(bi,bj);
+					kinEX(bi,bj);
+					/*rectToPolar(bi,bj);
 					kinE(bi,bj);
-					polarToRect(bi,bj);			        
+					polarToRect(bi,bj);*/			        
 				}
 			}
 		}

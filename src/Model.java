@@ -14,15 +14,10 @@ class Model {
 	double areaWidth, areaHeight;
 	Random rand = new Random();
 	Ball [] balls;
-	boolean sameDirection;
 	
-	final static int ELEMENT_WEIGHT = 2;
+	final static double ELEMENT_WEIGHT = 2;
 	final static double GRAVITY = 9.82; 
-	
-	public enum Direction {
-		NORTHWEST, NORTHEAST, SOUTHEAST, SOUTHWEST, NOCOLLISION
-	}
-	
+		
 	
 	Model(double width, double height) {
 		areaWidth = width;
@@ -35,8 +30,8 @@ class Model {
 	//random values
 	Ball[] ballGenerator(int balls){
 		Ball[] ballArray = new Ball[balls];
-		ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.1);
-		ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.2);
+		ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.2);
+		ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.25);
 		for(int i=2;i<balls; i++){
 			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3);
 		}
@@ -64,25 +59,52 @@ class Model {
 		bj.trueVelocity = I+(bi.mass*R)/(bi.mass+bj.mass);
 		bi.trueVelocity = bj.trueVelocity-R;
 	}
+
 	void polarToRect(Ball bi, Ball bj) {
-		bi.vx = Math.cos(bi.angle)*bi.trueVelocity;
-        bi.vy = Math.sin(bi.angle)*bi.trueVelocity;
-        
-		bj.vx = Math.cos(bj.angle)*bj.trueVelocity;
-        bj.vy = Math.sin(bj.angle)*bj.trueVelocity;
+		bi.vx = Math.sin(bi.collisionAngle)*bi.trueVelocity;
+		bj.vx = Math.sin(bi.collisionAngle)*bj.trueVelocity;
+		
+        bi.vy = Math.cos(bi.collisionAngle)*bi.trueVelocity;
+        bj.vy = Math.cos(bi.collisionAngle)*bj.trueVelocity;
+		
+    
 	}
 	void rectToPolar(Ball bi, Ball bj) {
         bi.trueVelocity = Math.sqrt(bi.vx*bi.vx+bi.vy*bi.vy);
-        bi.angle = Math.asin(bi.vx / bi.trueVelocity);
+        bi.angle = Math.acos(bi.vx / bi.trueVelocity);
         
         bj.trueVelocity = Math.sqrt(bj.vx*bj.vx+bj.vy*bj.vy);
-        bj.angle = Math.asin(bj.vx / bj.trueVelocity);
+        bj.angle = Math.acos(bj.vx / bj.trueVelocity);
 	}
-
+	void unStuckBalls(Ball bi, Ball bj) {
+        double x = Math.abs(bi.x - bj.x);
+        double y = Math.abs(bi.y - bj.y);
+        double dist = Math.sqrt(x*x + y*y);
+        double overlap = Math.abs(dist-bi.radius-bj.radius);
+        
+        if(bi.x<bj.x){
+        	bi.x =bi.x- overlap;//*Math.cos(bi.collisionAngle);
+        	bj.x =bj.x+ overlap;//*Math.cos(bi.collisionAngle);
+        }
+        else {
+        	bi.x =bi.x+ overlap;//*Math.cos(bi.collisionAngle);
+        	bj.x =bj.x- overlap;//*Math.cos(bi.collisionAngle);
+        }
+        if(bi.y<bj.y){
+        	bi.y =bi.y- overlap;//*Math.sin(bi.collisionAngle);
+        	bj.y =bj.y+ overlap;//*Math.sin(bi.collisionAngle);
+        }
+        else {
+        	bi.y =bi.y+ overlap;//*Math.sin(bi.collisionAngle);
+        	bj.y =bj.y- overlap;//*Math.sin(bi.collisionAngle);
+        }       
+	}
+	
 	boolean collision(Ball bi, Ball bj){
         double x = Math.abs(bi.x - bj.x);
         double y = Math.abs(bi.y - bj.y);
         double dist = Math.sqrt(x*x + y*y);
+        bi.collisionAngle = Math.acos(x/dist);
         return(dist <= (bi.radius + bj.radius));
 	}
 	//Ball's volume
@@ -100,13 +122,13 @@ class Model {
 			Ball bi=balls[i];
 			for(int j=i+1;j<balls.length;j++){
 				Ball bj = balls[j];
-				sameDirection=(Math.signum(bi.vx)==Math.signum(bj.vx));
 				if(collision(bi,bj)){
-					kinEY(bi,bj);
-					kinEX(bi,bj);
-					/*rectToPolar(bi,bj);
+					//kinEY(bi,bj);
+					//kinEX(bi,bj);
+					rectToPolar(bi,bj);
 					kinE(bi,bj);
-					polarToRect(bi,bj);*/			        
+					polarToRect(bi,bj);	
+					unStuckBalls(bi,bj);
 				}
 			}
 		}
@@ -116,7 +138,7 @@ class Model {
 			double deltaG = b.mass*Model.GRAVITY;
 			
 			// compute new position according to the speed of the ball
-			b.vy=b.vy-deltaG;
+			b.vy=b.vy;//-deltaG;
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
 			
@@ -170,6 +192,6 @@ class Model {
 		 */
 		double x, y, vx, vy, radius;
 		final double mass;
-		double angle,trueVelocity;
+		double angle,trueVelocity,collisionAngle;
 	}
 }

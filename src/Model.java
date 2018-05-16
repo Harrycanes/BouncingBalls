@@ -33,7 +33,7 @@ class Model {
 		ballArray[0] = new Ball(areaWidth/ 3, areaHeight * 0.9, 1.2, 1.6, 0.2);
 		ballArray[1] = new Ball(2 * areaWidth / 3, areaHeight * 0.7, -0.6, 0.6, 0.25);
 		for(int i=2;i<balls; i++){
-			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3);
+			ballArray[i]= new Ball(rand.nextDouble()+1, rand.nextDouble()+1, rand.nextDouble()+1, 0, rand.nextDouble()/3+0.05);
 		}
 		return ballArray;
 	}
@@ -61,10 +61,10 @@ class Model {
 	}
 
 	void polarToRect(Ball bi, Ball bj) {
-		bi.vx = Math.sin(bi.collisionAngle)*bi.trueVelocity;
+		bi.vx = Math.sin(bi.collisionAngle+Math.PI)*bi.trueVelocity;
 		bj.vx = Math.sin(bi.collisionAngle)*bj.trueVelocity;
 		
-        bi.vy = Math.cos(bi.collisionAngle)*bi.trueVelocity;
+        bi.vy = Math.cos(bi.collisionAngle+Math.PI)*bi.trueVelocity;
         bj.vy = Math.cos(bi.collisionAngle)*bj.trueVelocity;
 		
     
@@ -101,8 +101,8 @@ class Model {
 	}
 	
 	boolean collision(Ball bi, Ball bj){
-        double x = Math.abs(bi.x - bj.x);
-        double y = Math.abs(bi.y - bj.y);
+        double x = (bi.x - bj.x);
+        double y = (bi.y - bj.y);
         double dist = Math.sqrt(x*x + y*y);
         bi.collisionAngle = Math.acos(x/dist);
         return(dist <= (bi.radius + bj.radius));
@@ -138,7 +138,7 @@ class Model {
 			double deltaG = b.mass*Model.GRAVITY;
 			
 			// compute new position according to the speed of the ball
-			b.vy=b.vy;//-deltaG;
+			b.vy=b.vy-deltaG;
 			b.x += deltaT * b.vx;
 			b.y += deltaT * b.vy;
 			
